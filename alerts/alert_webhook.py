@@ -1,22 +1,42 @@
+# alert_webhook_async.py
 from fastapi import FastAPI, Request
-from kafka import KafkaProducer
+import aio_pika
 import json
 
 app = FastAPI()
 
-producer = KafkaProducer(
-    bootstrap_servers="localhost:9092",
-    value_serializer=lambda v: json.dumps(v).encode("utf-8")
-)
+@app.on_event("startup")
+async def startup_event():
+    # Create a robust connection at startup
+    app.state.connection = await aio_pika.connect_robust("amqp://guest:guest@localhost/")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    # Close connection cleanly
+    await app.state.connection.close()
 
 @app.post("/alert")
 async def receive_alert(request: Request):
-
     data = await request.json()
+    print("🚨 Alert received:", data)
 
-    print("Alert received:")
-    print(data)
+    try:
+        # Open channel from the shared connection
+        async with app.state.connection.channel() as channel:
+            # Ensure queue exists
+            await channel.declare_queue("incidents", durable=True)
 
-    producer.send("incidents", data)
+            # Publish message
+            await channel.default_exchange.publish(
+                aio_pika.Message(
+                    body=json.dumps(data).encode(),
+                    delivery_mode=aio_pika.DeliveryMode.PERSISTENT
+                ),
+                routing_key="incidents"
+            )
 
-    return {"status": "sent to kafka"}
+        return {"status": "sent to rabbitmq"}
+
+    except Exception as e:
+        print("❌ Error publishing to RabbitMQ:", e)
+        return {"status": "error", "detail": str(e)}

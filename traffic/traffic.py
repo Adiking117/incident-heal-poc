@@ -10,4 +10,4 @@ while True:
     except:
         print("error")
 
-    time.sleep(2)
+    time.sleep(3)

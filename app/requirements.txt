@@ -3,3 +3,11 @@ flask
 uvicorn
 prometheus_client
 kafka-python
+fastmcp
+langchain 
+langchain-mcp-adapters 
+langchain-groq 
+python-dotenv 
+requests 
+pika
+aio-pika
