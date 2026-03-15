@@ -1,0 +1,5 @@
+fastapi
+flask
+uvicorn
+prometheus_client
+kafka-python
