@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 5s
+
+rule_files:
+  - "alerts.yml"
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - localhost:9093
+
+scrape_configs:
+
+  - job_name: "incident-app"
+
+    static_configs:
+      - targets: ["localhost:5000"]

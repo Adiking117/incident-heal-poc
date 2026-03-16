@@ -1,0 +1,18 @@
+groups:
+
+- name: payment-alerts
+
+  rules:
+
+  - alert: PaymentServiceDown
+
+    expr: payment_errors_total > 3
+
+    for: 10s
+
+    labels:
+      severity: critical
+
+    annotations:
+      description: "Payment service is failing repeatedly. Solution is to Restart the service (Docker Image) with name incident-app"
+      summary: "Payment service is down"

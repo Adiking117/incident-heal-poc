@@ -1,0 +1,10 @@
+route:
+  receiver: rabbitmq-webhook
+
+receivers:
+
+- name: rabbitmq-webhook
+
+  webhook_configs:
+
+  - url: "http://localhost:7000/alert"
